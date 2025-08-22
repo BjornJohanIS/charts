@@ -16,7 +16,6 @@
 import 'package:charts_common/common.dart' as common
     show
         BehaviorPosition,
-        ChartBehavior,
         DatumLegend,
         InsideJustification,
         LegendEntry,
@@ -25,15 +24,12 @@ import 'package:charts_common/common.dart' as common
         OutsideJustification,
         SelectionModelType,
         TextStyleSpec;
-import 'package:flutter/widgets.dart'
-    show BuildContext, EdgeInsets, Widget, hashValues;
+import 'package:flutter/widgets.dart' show BuildContext, EdgeInsets, Widget;
 import 'package:meta/meta.dart' show immutable;
 import '../../chart_container.dart' show ChartContainerRenderObject;
-import '../chart_behavior.dart'
-    show BuildableBehavior, ChartBehavior, GestureType;
+import '../chart_behavior.dart' show BuildableBehavior, ChartBehavior, GestureType;
 import 'legend.dart' show TappableLegend;
-import 'legend_content_builder.dart'
-    show LegendContentBuilder, TabularLegendContentBuilder;
+import 'legend_content_builder.dart' show LegendContentBuilder, TabularLegendContentBuilder;
 import 'legend_layout.dart' show TabularLegendLayout;
 
 /// Datum legend behavior for charts.
@@ -46,87 +42,13 @@ class DatumLegend<D> extends ChartBehavior<D> {
   static const defaultOutsideJustification =
       common.OutsideJustification.startDrawArea;
   static const defaultInsideJustification = common.InsideJustification.topStart;
+  static const defaultCellPadding = EdgeInsets.all(8.0);
 
-  final desiredGestures = new Set<GestureType>();
+  final Set<GestureType> desiredGestures = {};
 
-  final common.SelectionModelType? selectionModelType;
+  final _DatumLegendConfig _config;
 
-  /// Builder for creating custom legend content.
-  final LegendContentBuilder contentBuilder;
-
-  /// Position of the legend relative to the chart.
-  final common.BehaviorPosition position;
-
-  /// Justification of the legend relative to the chart
-  final common.OutsideJustification outsideJustification;
-  final common.InsideJustification insideJustification;
-
-  /// Whether or not the legend should show measures.
-  ///
-  /// By default this is false, measures are not shown. When set to true, the
-  /// default behavior is to show measure only if there is selected data.
-  /// Please set [legendDefaultMeasure] to something other than none to enable
-  /// showing measures when there is no selection.
-  ///
-  /// This flag is used by the [contentBuilder], so a custom content builder
-  /// has to choose if it wants to use this flag.
-  final bool showMeasures;
-
-  /// Option to show measures when selection is null.
-  ///
-  /// By default this is set to none, so no measures are shown when there is
-  /// no selection.
-  final common.LegendDefaultMeasure? legendDefaultMeasure;
-
-  /// Formatter for measure value(s) if the measures are shown on the legend.
-  final common.MeasureFormatter? measureFormatter;
-
-  /// Formatter for secondary measure value(s) if the measures are shown on the
-  /// legend and the series uses the secondary axis.
-  final common.MeasureFormatter? secondaryMeasureFormatter;
-
-  /// Styles for legend entry label text.
-  final common.TextStyleSpec? entryTextStyle;
-
-  static const defaultCellPadding = const EdgeInsets.all(8.0);
-
-  /// Create a new tabular layout legend.
-  ///
-  /// By default, the legend is place above the chart and horizontally aligned
-  /// to the start of the draw area.
-  ///
-  /// [position] the legend will be positioned relative to the chart. Default
-  /// position is top.
-  ///
-  /// [outsideJustification] justification of the legend relative to the chart
-  /// if the position is top, bottom, left, right. Default to start of the draw
-  /// area.
-  ///
-  /// [insideJustification] justification of the legend relative to the chart if
-  /// the position is inside. Default to top of the chart, start of draw area.
-  /// Start of draw area means left for LTR directionality, and right for RTL.
-  ///
-  /// [horizontalFirst] if true, legend entries will grow horizontally first
-  /// instead of vertically first. If the position is top, bottom, or inside,
-  /// this defaults to true. Otherwise false.
-  ///
-  /// [desiredMaxRows] the max rows to use before layout out items in a new
-  /// column. By default there is no limit. The max columns created is the
-  /// smaller of desiredMaxRows and number of legend entries.
-  ///
-  /// [desiredMaxColumns] the max columns to use before laying out items in a
-  /// new row. By default there is no limit. The max columns created is the
-  /// smaller of desiredMaxColumns and number of legend entries.
-  ///
-  /// [showMeasures] show measure values for each series.
-  ///
-  /// [legendDefaultMeasure] if measure should show when there is no selection.
-  /// This is set to none by default (only shows measure for selected data).
-  ///
-  /// [measureFormatter] formats measure value if measures are shown.
-  ///
-  /// [secondaryMeasureFormatter] formats measures if measures are shown for the
-  /// series that uses secondary measure axis.
+  /// Constructs a tabular legend with default layout.
   factory DatumLegend({
     common.BehaviorPosition? position,
     common.OutsideJustification? outsideJustification,
@@ -141,26 +63,23 @@ class DatumLegend<D> extends ChartBehavior<D> {
     common.MeasureFormatter? secondaryMeasureFormatter,
     common.TextStyleSpec? entryTextStyle,
   }) {
-    // Set defaults if empty.
     position ??= defaultBehaviorPosition;
     outsideJustification ??= defaultOutsideJustification;
     insideJustification ??= defaultInsideJustification;
     cellPadding ??= defaultCellPadding;
-
-    // Set the tabular layout settings to match the position if it is not
-    // specified.
     horizontalFirst ??= (position == common.BehaviorPosition.top ||
         position == common.BehaviorPosition.bottom ||
         position == common.BehaviorPosition.inside);
+
     final layoutBuilder = horizontalFirst
-        ? new TabularLegendLayout.horizontalFirst(
+        ? TabularLegendLayout.horizontalFirst(
             desiredMaxColumns: desiredMaxColumns, cellPadding: cellPadding)
-        : new TabularLegendLayout.verticalFirst(
+        : TabularLegendLayout.verticalFirst(
             desiredMaxRows: desiredMaxRows, cellPadding: cellPadding);
 
-    return new DatumLegend._internal(
-        contentBuilder:
-            new TabularLegendContentBuilder(legendLayout: layoutBuilder),
+    return DatumLegend._internal(
+      config: _DatumLegendConfig(
+        contentBuilder: TabularLegendContentBuilder(legendLayout: layoutBuilder),
         selectionModelType: common.SelectionModelType.info,
         position: position,
         outsideJustification: outsideJustification,
@@ -170,36 +89,12 @@ class DatumLegend<D> extends ChartBehavior<D> {
             legendDefaultMeasure ?? common.LegendDefaultMeasure.none,
         measureFormatter: measureFormatter,
         secondaryMeasureFormatter: secondaryMeasureFormatter,
-        entryTextStyle: entryTextStyle);
+        entryTextStyle: entryTextStyle,
+      ),
+    );
   }
 
-  /// Create a legend with custom layout.
-  ///
-  /// By default, the legend is place above the chart and horizontally aligned
-  /// to the start of the draw area.
-  ///
-  /// [contentBuilder] builder for the custom layout.
-  ///
-  /// [position] the legend will be positioned relative to the chart. Default
-  /// position is top.
-  ///
-  /// [outsideJustification] justification of the legend relative to the chart
-  /// if the position is top, bottom, left, right. Default to start of the draw
-  /// area.
-  ///
-  /// [insideJustification] justification of the legend relative to the chart if
-  /// the position is inside. Default to top of the chart, start of draw area.
-  /// Start of draw area means left for LTR directionality, and right for RTL.
-  ///
-  /// [showMeasures] show measure values for each series.
-  ///
-  /// [legendDefaultMeasure] if measure should show when there is no selection.
-  /// This is set to none by default (only shows measure for selected data).
-  ///
-  /// [measureFormatter] formats measure value if measures are shown.
-  ///
-  /// [secondaryMeasureFormatter] formats measures if measures are shown for the
-  /// series that uses secondary measure axis.
+  /// Constructs a legend with custom layout builder.
   factory DatumLegend.customLayout(
     LegendContentBuilder contentBuilder, {
     common.BehaviorPosition? position,
@@ -211,58 +106,84 @@ class DatumLegend<D> extends ChartBehavior<D> {
     common.MeasureFormatter? secondaryMeasureFormatter,
     common.TextStyleSpec? entryTextStyle,
   }) {
-    // Set defaults if empty.
     position ??= defaultBehaviorPosition;
     outsideJustification ??= defaultOutsideJustification;
     insideJustification ??= defaultInsideJustification;
 
-    return new DatumLegend._internal(
-      contentBuilder: contentBuilder,
-      selectionModelType: common.SelectionModelType.info,
-      position: position,
-      outsideJustification: outsideJustification,
-      insideJustification: insideJustification,
-      showMeasures: showMeasures ?? false,
-      legendDefaultMeasure:
-          legendDefaultMeasure ?? common.LegendDefaultMeasure.none,
-      measureFormatter: measureFormatter,
-      secondaryMeasureFormatter: secondaryMeasureFormatter,
-      entryTextStyle: entryTextStyle,
+    return DatumLegend._internal(
+      config: _DatumLegendConfig(
+        contentBuilder: contentBuilder,
+        selectionModelType: common.SelectionModelType.info,
+        position: position,
+        outsideJustification: outsideJustification,
+        insideJustification: insideJustification,
+        showMeasures: showMeasures ?? false,
+        legendDefaultMeasure:
+            legendDefaultMeasure ?? common.LegendDefaultMeasure.none,
+        measureFormatter: measureFormatter,
+        secondaryMeasureFormatter: secondaryMeasureFormatter,
+        entryTextStyle: entryTextStyle,
+      ),
     );
   }
 
-  DatumLegend._internal({
-    required this.contentBuilder,
-    this.selectionModelType,
-    required this.position,
-    required this.outsideJustification,
-    required this.insideJustification,
-    required this.showMeasures,
-    this.legendDefaultMeasure,
-    this.measureFormatter,
-    this.secondaryMeasureFormatter,
-    this.entryTextStyle,
-  });
+  DatumLegend._internal({required _DatumLegendConfig config}) : _config = config;
 
   @override
-  common.DatumLegend<D> createCommonBehavior() =>
-      new _FlutterDatumLegend<D>(this);
+  common.DatumLegend<D> createCommonBehavior() => _FlutterDatumLegend<D>(this);
 
   @override
   void updateCommonBehavior(common.ChartBehavior commonBehavior) {
     (commonBehavior as _FlutterDatumLegend).config = this;
   }
 
-  /// All Legend behaviors get the same role ID, because you should only have
-  /// one legend on a chart.
   @override
   String get role => 'legend';
 
   @override
   bool operator ==(Object o) {
-    return o is DatumLegend &&
-        selectionModelType == o.selectionModelType &&
+    return o is DatumLegend && _config == o._config;
+  }
+
+  @override
+  int get hashCode => _config.hashCode;
+
+  // Expose config for internal use
+  _DatumLegendConfig get config => _config;
+}
+
+/// Private configuration object for DatumLegend.
+@immutable
+class _DatumLegendConfig {
+  final LegendContentBuilder contentBuilder;
+  final common.SelectionModelType? selectionModelType;
+  final common.BehaviorPosition position;
+  final common.OutsideJustification outsideJustification;
+  final common.InsideJustification insideJustification;
+  final bool showMeasures;
+  final common.LegendDefaultMeasure? legendDefaultMeasure;
+  final common.MeasureFormatter? measureFormatter;
+  final common.MeasureFormatter? secondaryMeasureFormatter;
+  final common.TextStyleSpec? entryTextStyle;
+
+  const _DatumLegendConfig({
+    required this.contentBuilder,
+    required this.selectionModelType,
+    required this.position,
+    required this.outsideJustification,
+    required this.insideJustification,
+    required this.showMeasures,
+    required this.legendDefaultMeasure,
+    required this.measureFormatter,
+    required this.secondaryMeasureFormatter,
+    required this.entryTextStyle,
+  });
+
+  @override
+  bool operator ==(Object o) {
+    return o is _DatumLegendConfig &&
         contentBuilder == o.contentBuilder &&
+        selectionModelType == o.selectionModelType &&
         position == o.position &&
         outsideJustification == o.outsideJustification &&
         insideJustification == o.insideJustification &&
@@ -274,10 +195,9 @@ class DatumLegend<D> extends ChartBehavior<D> {
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-        selectionModelType,
+  int get hashCode => Object.hash(
         contentBuilder,
+        selectionModelType,
         position,
         outsideJustification,
         insideJustification,
@@ -285,23 +205,23 @@ class DatumLegend<D> extends ChartBehavior<D> {
         legendDefaultMeasure,
         measureFormatter,
         secondaryMeasureFormatter,
-        entryTextStyle);
-  }
+        entryTextStyle,
+      );
 }
 
-/// Flutter specific wrapper on the common Legend for building content.
+/// Flutter-specific wrapper for DatumLegend.
 class _FlutterDatumLegend<D> extends common.DatumLegend<D>
     implements BuildableBehavior, TappableLegend {
-  DatumLegend config;
+  DatumLegend<D> config;
 
   _FlutterDatumLegend(this.config)
       : super(
-          selectionModelType: config.selectionModelType,
-          measureFormatter: config.measureFormatter,
-          secondaryMeasureFormatter: config.secondaryMeasureFormatter,
-          legendDefaultMeasure: config.legendDefaultMeasure,
+          selectionModelType: config.config.selectionModelType,
+          measureFormatter: config.config.measureFormatter,
+          secondaryMeasureFormatter: config.config.secondaryMeasureFormatter,
+          legendDefaultMeasure: config.config.legendDefaultMeasure,
         ) {
-    super.entryTextStyle = config.entryTextStyle;
+    super.entryTextStyle = config.config.entryTextStyle;
   }
 
   @override
@@ -310,32 +230,29 @@ class _FlutterDatumLegend<D> extends common.DatumLegend<D>
   }
 
   @override
-  common.BehaviorPosition get position => config.position;
+  common.BehaviorPosition get position => config.config.position;
 
   @override
   common.OutsideJustification get outsideJustification =>
-      config.outsideJustification;
+      config.config.outsideJustification;
 
   @override
   common.InsideJustification get insideJustification =>
-      config.insideJustification;
+      config.config.insideJustification;
 
   @override
   Widget build(BuildContext context) {
     final hasSelection =
         legendState.legendEntries.any((entry) => entry.isSelected);
 
-    // Show measures if [showMeasures] is true and there is a selection or if
-    // showing measures when there is no selection.
-    final showMeasures = config.showMeasures &&
+    final showMeasures = config.config.showMeasures &&
         (hasSelection ||
             legendDefaultMeasure != common.LegendDefaultMeasure.none);
 
-    return config.contentBuilder
+    return config.config.contentBuilder
         .build(context, legendState, this, showMeasures: showMeasures);
   }
 
-  /// TODO: Maybe highlight the pie wedge.
   @override
   onLegendEntryTapUp(common.LegendEntry detail) {}
 }
