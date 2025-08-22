@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:collection/collection.dart' show ListEquality;
 import 'package:charts_common/common.dart' as common
     show
         AnnotationLabelAnchor,
@@ -24,75 +25,71 @@ import 'package:charts_common/common.dart' as common
         MaterialPalette,
         RangeAnnotation,
         TextStyleSpec;
-import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter/widgets.dart' show hashValues;
 import 'package:meta/meta.dart' show immutable;
 
 import 'chart_behavior.dart' show ChartBehavior, GestureType;
 
-/// Chart behavior that annotations domain ranges with a solid fill color.
+/// Chart behavior that annotates domain ranges with a solid fill color.
 ///
-/// The annotations will be drawn underneath series data and chart axes.
-///
-/// This is typically used for line charts to call out sections of the data
-/// range.
+/// Annotations are drawn underneath series data and chart axes.
+/// Typically used in line charts to highlight sections of the data range.
 @immutable
 class RangeAnnotation<D> extends ChartBehavior<D> {
-  final desiredGestures = new Set<GestureType>();
+  final Set<GestureType> desiredGestures = {};
 
   /// List of annotations to render on the chart.
   final List<common.AnnotationSegment<Object>> annotations;
 
-  /// Configures where to anchor annotation label text.
+  /// Default label anchor configuration.
   final common.AnnotationLabelAnchor? defaultLabelAnchor;
 
-  /// Direction of label text on the annotations.
+  /// Default direction of label text.
   final common.AnnotationLabelDirection? defaultLabelDirection;
 
-  /// Configures where to place labels relative to the annotation.
+  /// Default position for labels relative to the annotation.
   final common.AnnotationLabelPosition? defaultLabelPosition;
 
-  /// Configures the style of label text.
+  /// Default text style for labels.
   final common.TextStyleSpec? defaultLabelStyleSpec;
 
-  /// Default color for annotations.
+  /// Default color for annotation fill.
   final common.Color? defaultColor;
 
-  /// Whether or not the range of the axis should be extended to include the
-  /// annotation start and end values.
+  /// Whether to extend the axis range to include annotation bounds.
   final bool? extendAxis;
 
-  /// Space before and after label text.
+  /// Padding around the label text.
   final int? labelPadding;
 
-  /// Configures the order in which the behavior should be painted.
-  /// This value should be relative to LayoutPaintViewOrder.rangeAnnotation.
-  /// (e.g. LayoutViewPaintOrder.rangeAnnotation + 1)
+  /// Paint order for this behavior relative to other chart behaviors.
   final int? layoutPaintOrder;
 
-  RangeAnnotation(this.annotations,
-      {common.Color? defaultColor,
-      this.defaultLabelAnchor,
-      this.defaultLabelDirection,
-      this.defaultLabelPosition,
-      this.defaultLabelStyleSpec,
-      this.extendAxis,
-      this.labelPadding,
-      this.layoutPaintOrder})
-      : this.defaultColor =
-            defaultColor ?? common.MaterialPalette.gray.shade100;
+  RangeAnnotation(
+    this.annotations, {
+    common.Color? defaultColor,
+    this.defaultLabelAnchor,
+    this.defaultLabelDirection,
+    this.defaultLabelPosition,
+    this.defaultLabelStyleSpec,
+    this.extendAxis,
+    this.labelPadding,
+    this.layoutPaintOrder,
+  }) : defaultColor = defaultColor ?? common.MaterialPalette.gray.shade100;
 
   @override
   common.RangeAnnotation<D> createCommonBehavior() =>
-      new common.RangeAnnotation<D>(annotations,
-          defaultColor: defaultColor,
-          defaultLabelAnchor: defaultLabelAnchor,
-          defaultLabelDirection: defaultLabelDirection,
-          defaultLabelPosition: defaultLabelPosition,
-          defaultLabelStyleSpec: defaultLabelStyleSpec,
-          extendAxis: extendAxis,
-          labelPadding: labelPadding,
-          layoutPaintOrder: layoutPaintOrder);
+      common.RangeAnnotation<D>(
+        annotations,
+        defaultColor: defaultColor,
+        defaultLabelAnchor: defaultLabelAnchor,
+        defaultLabelDirection: defaultLabelDirection,
+        defaultLabelPosition: defaultLabelPosition,
+        defaultLabelStyleSpec: defaultLabelStyleSpec,
+        extendAxis: extendAxis,
+        labelPadding: labelPadding,
+        layoutPaintOrder: layoutPaintOrder,
+      );
 
   @override
   void updateCommonBehavior(common.ChartBehavior commonBehavior) {}
@@ -103,7 +100,7 @@ class RangeAnnotation<D> extends ChartBehavior<D> {
   @override
   bool operator ==(Object o) {
     return o is RangeAnnotation &&
-        new ListEquality().equals(annotations, o.annotations) &&
+        ListEquality().equals(annotations, o.annotations) &&
         defaultColor == o.defaultColor &&
         extendAxis == o.extendAxis &&
         defaultLabelAnchor == o.defaultLabelAnchor &&
@@ -116,13 +113,14 @@ class RangeAnnotation<D> extends ChartBehavior<D> {
 
   @override
   int get hashCode => hashValues(
-      annotations,
-      defaultColor,
-      extendAxis,
-      defaultLabelAnchor,
-      defaultLabelDirection,
-      defaultLabelPosition,
-      defaultLabelStyleSpec,
-      labelPadding,
-      layoutPaintOrder);
+        annotations,
+        defaultColor,
+        extendAxis,
+        defaultLabelAnchor,
+        defaultLabelDirection,
+        defaultLabelPosition,
+        defaultLabelStyleSpec,
+        labelPadding,
+        layoutPaintOrder,
+      );
 }
