@@ -21,7 +21,7 @@ import 'package:charts_common/common.dart' as common
         LinePointHighlighterFollowLineType,
         SelectionModelType,
         SymbolRenderer;
-import 'package:flutter/widgets.dart' show hashValues;
+import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart' show immutable;
 
 import 'chart_behavior.dart' show ChartBehavior, GestureType;
@@ -87,13 +87,14 @@ class LinePointHighlighter<D> extends ChartBehavior<D> {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode =>
+      Object.hash(
         selectionModelType,
         defaultRadiusPx,
         radiusPaddingPx,
         showHorizontalFollowLine,
         showVerticalFollowLine,
-        dashPattern,
         drawFollowLinesAcrossChart,
-      );
+      ) ^
+      Object.hashAll(dashPattern ?? []);
 }
