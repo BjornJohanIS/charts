@@ -19,7 +19,6 @@ import 'package:charts_common/common.dart' as common
         DomainA11yExploreBehavior,
         VocalizationCallback,
         ExploreModeTrigger;
-import 'package:flutter/widgets.dart' show hashValues;
 import '../chart_behavior.dart' show ChartBehavior, GestureType;
 
 /// Behavior that generates semantic nodes for each domain.
@@ -61,19 +60,19 @@ class DomainA11yExploreBehavior<D> extends ChartBehavior<D> {
     String? exploreModeEnabledAnnouncement,
     String? exploreModeDisabledAnnouncement,
   }) {
-    final desiredGestures = new Set<GestureType>();
+    final desiredGestures = <GestureType>{};
     exploreModeTrigger ??= common.ExploreModeTrigger.pressHold;
 
     switch (exploreModeTrigger) {
       case common.ExploreModeTrigger.pressHold:
-        desiredGestures..add(GestureType.onLongPress);
+        desiredGestures.add(GestureType.onLongPress);
         break;
       case common.ExploreModeTrigger.tap:
-        desiredGestures..add(GestureType.onTap);
+        desiredGestures.add(GestureType.onTap);
         break;
     }
 
-    return new DomainA11yExploreBehavior._internal(
+    return DomainA11yExploreBehavior._internal(
       vocalizationCallback: vocalizationCallback,
       desiredGestures: desiredGestures,
       exploreModeTrigger: exploreModeTrigger,
@@ -85,7 +84,7 @@ class DomainA11yExploreBehavior<D> extends ChartBehavior<D> {
 
   @override
   common.DomainA11yExploreBehavior<D> createCommonBehavior() {
-    return new common.DomainA11yExploreBehavior<D>(
+    return common.DomainA11yExploreBehavior<D>(
         vocalizationCallback: vocalizationCallback,
         exploreModeTrigger: exploreModeTrigger,
         minimumWidth: minimumWidth,
@@ -110,7 +109,12 @@ class DomainA11yExploreBehavior<D> extends ChartBehavior<D> {
 
   @override
   int get hashCode {
-    return hashValues(minimumWidth, vocalizationCallback, exploreModeTrigger,
-        exploreModeEnabledAnnouncement, exploreModeDisabledAnnouncement);
+    return Object.hashAll([
+      minimumWidth,
+      vocalizationCallback,
+      exploreModeTrigger,
+      exploreModeEnabledAnnouncement,
+      exploreModeDisabledAnnouncement,
+    ]);
   }
 }
