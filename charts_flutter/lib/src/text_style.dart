@@ -2,7 +2,7 @@
 // for details.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
+// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
@@ -18,13 +18,22 @@ import 'package:charts_common/common.dart' as common show Color, TextStyle;
 
 /// Flutter wrapper for charts_common TextStyle
 class TextStyle implements common.TextStyle {
-  final int? fontSize;
-  final String? fontFamily;
-  final common.Color? color;
-  final double? lineHeight;
-  final String? fontWeight;
+  @override
+  int? fontSize;
 
-  const TextStyle({
+  @override
+  String? fontFamily;
+
+  @override
+  common.Color? color;
+
+  @override
+  double? lineHeight;
+
+  @override
+  String? fontWeight;
+
+  TextStyle({
     this.fontSize,
     this.fontFamily,
     this.color,
