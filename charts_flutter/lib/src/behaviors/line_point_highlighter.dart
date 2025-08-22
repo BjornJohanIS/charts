@@ -26,65 +26,38 @@ import 'package:meta/meta.dart' show immutable;
 
 import 'chart_behavior.dart' show ChartBehavior, GestureType;
 
-/// Chart behavior that monitors the specified [SelectionModel] and darkens the
-/// color for selected data.
+/// Chart behavior that monitors the specified [SelectionModel] and highlights
+/// selected data points.
 ///
-/// This is typically used for bars and pies to highlight segments.
-///
-/// It is used in combination with SelectNearest to update the selection model
-/// and expand selection out to the domain value.
+/// Typically used with bars, pies, and line charts, often in combination with
+/// SelectNearest.
 @immutable
 class LinePointHighlighter<D> extends ChartBehavior<D> {
-  final desiredGestures = new Set<GestureType>();
+  final Set<GestureType> desiredGestures = {};
 
   final common.SelectionModelType? selectionModelType;
-
-  /// Default radius of the dots if the series has no radius mapping function.
-  ///
-  /// When no radius mapping function is provided, this value will be used as
-  /// is. [radiusPaddingPx] will not be added to [defaultRadiusPx].
   final double? defaultRadiusPx;
-
-  /// Additional radius value added to the radius of the selected data.
-  ///
-  /// This value is only used when the series has a radius mapping function
-  /// defined.
   final double? radiusPaddingPx;
-
   final common.LinePointHighlighterFollowLineType? showHorizontalFollowLine;
-
   final common.LinePointHighlighterFollowLineType? showVerticalFollowLine;
-
-  /// The dash pattern to be used for drawing the line.
-  ///
-  /// To disable dash pattern (to draw a solid line), pass in an empty list.
-  /// This is because if dashPattern is null or not set, it defaults to [1,3].
   final List<int>? dashPattern;
-
-  /// Whether or not follow lines should be drawn across the entire chart draw
-  /// area, or just from the axis to the point.
-  ///
-  /// When disabled, measure follow lines will be drawn from the primary measure
-  /// axis to the point. In RTL mode, this means from the right-hand axis. In
-  /// LTR mode, from the left-hand axis.
   final bool? drawFollowLinesAcrossChart;
-
-  /// Renderer used to draw the highlighted points.
   final common.SymbolRenderer? symbolRenderer;
 
-  LinePointHighlighter(
-      {this.selectionModelType,
-      this.defaultRadiusPx,
-      this.radiusPaddingPx,
-      this.showHorizontalFollowLine,
-      this.showVerticalFollowLine,
-      this.dashPattern,
-      this.drawFollowLinesAcrossChart,
-      this.symbolRenderer});
+  LinePointHighlighter({
+    this.selectionModelType,
+    this.defaultRadiusPx,
+    this.radiusPaddingPx,
+    this.showHorizontalFollowLine,
+    this.showVerticalFollowLine,
+    this.dashPattern,
+    this.drawFollowLinesAcrossChart,
+    this.symbolRenderer,
+  });
 
   @override
   common.LinePointHighlighter<D> createCommonBehavior() =>
-      new common.LinePointHighlighter<D>(
+      common.LinePointHighlighter<D>(
         selectionModelType: selectionModelType,
         defaultRadiusPx: defaultRadiusPx,
         radiusPaddingPx: radiusPaddingPx,
@@ -109,20 +82,18 @@ class LinePointHighlighter<D> extends ChartBehavior<D> {
         showHorizontalFollowLine == o.showHorizontalFollowLine &&
         showVerticalFollowLine == o.showVerticalFollowLine &&
         selectionModelType == o.selectionModelType &&
-        new ListEquality().equals(dashPattern, o.dashPattern) &&
+        ListEquality().equals(dashPattern, o.dashPattern) &&
         drawFollowLinesAcrossChart == o.drawFollowLinesAcrossChart;
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      selectionModelType,
-      defaultRadiusPx,
-      radiusPaddingPx,
-      showHorizontalFollowLine,
-      showVerticalFollowLine,
-      dashPattern,
-      drawFollowLinesAcrossChart,
-    );
-  }
+  int get hashCode => hashValues(
+        selectionModelType,
+        defaultRadiusPx,
+        radiusPaddingPx,
+        showHorizontalFollowLine,
+        showVerticalFollowLine,
+        dashPattern,
+        drawFollowLinesAcrossChart,
+      );
 }
