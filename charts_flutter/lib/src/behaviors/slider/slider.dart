@@ -1,18 +1,3 @@
-// Copyright 2018 the Charts project authors. Please see the AUTHORS file
-// for details.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import 'dart:math' show Rectangle;
 import 'package:charts_common/common.dart' as common
     show
@@ -31,8 +16,8 @@ import '../chart_behavior.dart' show ChartBehavior, GestureType;
 
 /// Chart behavior that adds a slider widget to a chart.
 ///
-/// When the slider is dropped after drag, it reports its domain position and
-/// nearest datum value. Only supports charts with continuous scales.
+/// When the slider is dragged and released, it reports its domain position
+/// and nearest datum value. Only supports charts with continuous scales.
 @immutable
 class Slider<D> extends ChartBehavior<D> {
   final Set<GestureType> desiredGestures;
@@ -93,10 +78,12 @@ class Slider<D> extends ChartBehavior<D> {
         break;
       case common.SelectionTrigger.pressHold:
       case common.SelectionTrigger.longPressHold:
-        gestures.addAll([GestureType.onTap, GestureType.onLongPress, GestureType.onDrag]);
+        gestures.addAll(
+            [GestureType.onTap, GestureType.onLongPress, GestureType.onDrag]);
         break;
       default:
-        throw ArgumentError('Slider does not support event trigger "$eventTrigger"');
+        throw ArgumentError(
+            'Slider does not support event trigger "$eventTrigger"');
     }
     return gestures;
   }
