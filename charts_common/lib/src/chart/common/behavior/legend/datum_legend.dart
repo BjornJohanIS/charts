@@ -2,7 +2,7 @@
 // for details.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
+// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
@@ -24,11 +24,6 @@ import 'per_datum_legend_entry_generator.dart';
 ///
 /// By default this behavior creates one legend entry per datum in the first
 /// series rendered on the chart.
-///
-/// TODO: Allows for hovering over a datum in legend to highlight
-/// corresponding datum in draw area.
-///
-/// TODO: Implement tap to hide individual data in the series.
 class DatumLegend<D> extends Legend<D> {
   /// Whether or not the series legend should show measures on datum selection.
   late bool _showMeasures;
@@ -42,11 +37,12 @@ class DatumLegend<D> extends Legend<D> {
     LegendDefaultMeasure? legendDefaultMeasure,
     TextStyleSpec? entryTextStyle,
   }) : super(
-            selectionModelType: selectionModelType ?? SelectionModelType.info,
-            legendEntryGenerator:
-                legendEntryGenerator ?? PerDatumLegendEntryGenerator(),
-            entryTextStyle: entryTextStyle) {
-    // Calling the setters will automatically use non-null default values.
+          selectionModelType: selectionModelType ?? SelectionModelType.info,
+          legendEntryGenerator:
+              legendEntryGenerator ?? PerDatumLegendEntryGenerator<D>(),
+          entryTextStyle: entryTextStyle,
+        ) {
+    // Calling the setters will automatically apply defaults.
     this.showMeasures = showMeasures;
     this.legendDefaultMeasure = legendDefaultMeasure;
     this.measureFormatter = measureFormatter;
@@ -55,12 +51,7 @@ class DatumLegend<D> extends Legend<D> {
 
   /// Whether or not the legend should show measures.
   ///
-  /// By default this is false, measures are not shown. When set to true, the
-  /// default behavior is to show measure only if there is selected data.
-  /// Please set [legendDefaultMeasure] to something other than none to enable
-  /// showing measures when there is no selection.
-  ///
-  /// If [showMeasures] is set to null, it is changed to the default of false.
+  /// Defaults to false. Only shows measure if there is selected data.
   bool get showMeasures => _showMeasures;
 
   set showMeasures(bool? showMeasures) {
@@ -68,12 +59,6 @@ class DatumLegend<D> extends Legend<D> {
   }
 
   /// Option to show measures when selection is null.
-  ///
-  /// By default this is set to none, so no measures are shown when there is
-  /// no selection.
-  ///
-  /// If [legendDefaultMeasure] is set to null, it is changed to the default of
-  /// none.
   LegendDefaultMeasure get legendDefaultMeasure =>
       legendEntryGenerator.legendDefaultMeasure;
 
@@ -84,19 +69,13 @@ class DatumLegend<D> extends Legend<D> {
 
   /// Formatter for measure values.
   ///
-  /// This is optional. The default formatter formats measure values with
-  /// NumberFormat.decimalPattern. If the measure value is null, a dash is
-  /// returned.
+  /// Defaults to `defaultLegendMeasureFormatter`.
   set measureFormatter(MeasureFormatter? formatter) {
     legendEntryGenerator.measureFormatter =
         formatter ?? defaultLegendMeasureFormatter;
   }
 
-  /// Formatter for measure values of series that uses the secondary axis.
-  ///
-  /// This is optional. The default formatter formats measure values with
-  /// NumberFormat.decimalPattern. If the measure value is null, a dash is
-  /// returned.
+  /// Formatter for secondary axis measure values.
   set secondaryMeasureFormatter(MeasureFormatter? formatter) {
     legendEntryGenerator.secondaryMeasureFormatter =
         formatter ?? defaultLegendMeasureFormatter;
