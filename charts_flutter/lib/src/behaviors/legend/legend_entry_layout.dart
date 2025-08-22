@@ -14,10 +14,8 @@
 // limitations under the License.
 
 import 'package:charts_common/common.dart' as common;
-import 'package:charts_flutter/src/util/color.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart'
-    show GestureDetector, GestureTapUpCallback, TapUpDetails, Theme;
 
 import '../../symbol_renderer.dart';
 import 'legend.dart' show TappableLegend;
@@ -29,54 +27,51 @@ abstract class LegendEntryLayout {
       {bool showMeasures});
 }
 
-/// Builds one legend entry as a row with symbol and label from the series.
-///
-/// If directionality from the chart context indicates RTL, the symbol is placed
-/// to the right of the text instead of the left of the text.
+/// Builds one legend entry as a row with symbol and label.
 class SimpleLegendEntryLayout implements LegendEntryLayout {
   const SimpleLegendEntryLayout();
 
   Widget createSymbol(BuildContext context, common.LegendEntry legendEntry,
       TappableLegend legend, bool isHidden) {
-    // TODO: Consider allowing scaling the size for the symbol.
-    // A custom symbol renderer can ignore this size and use their own.
-    final materialSymbolSize = new Size(12.0, 12.0);
+    final materialSymbolSize = Size(12.0, 12.0);
 
     final entryColor = legendEntry.color;
-    final color = entryColor == null ? null : ColorUtil.toDartColor(entryColor);
+    final color = entryColor == null ? null : Color(entryColor!.hex);
 
-    // Get the SymbolRendererBuilder wrapping a common.SymbolRenderer if needed.
     final SymbolRendererBuilder symbolRendererBuilder =
-        legendEntry.symbolRenderer! is SymbolRendererBuilder
-            ? legendEntry.symbolRenderer! as SymbolRendererBuilder
-            : new SymbolRendererCanvas(
+        legendEntry.symbolRenderer is SymbolRendererBuilder
+            ? legendEntry.symbolRenderer as SymbolRendererBuilder
+            : SymbolRendererCanvas(
                 legendEntry.symbolRenderer!, legendEntry.dashPattern);
 
-    return new GestureDetector(
-        child: symbolRendererBuilder.build(
-          context,
-          size: materialSymbolSize,
-          color: color,
-          enabled: !isHidden,
-        ),
-        onTapUp: makeTapUpCallback(context, legendEntry, legend));
+    return GestureDetector(
+      child: symbolRendererBuilder.build(
+        context,
+        size: materialSymbolSize,
+        color: color,
+        enabled: !isHidden,
+      ),
+      onTapUp: makeTapUpCallback(context, legendEntry, legend),
+    );
   }
 
   Widget createLabel(BuildContext context, common.LegendEntry legendEntry,
       TappableLegend legend, bool isHidden) {
-    TextStyle style =
+    final style =
         _convertTextStyle(isHidden, context, legendEntry.textStyle);
 
-    return new GestureDetector(
-        child: new Text(legendEntry.label, style: style),
-        onTapUp: makeTapUpCallback(context, legendEntry, legend));
+    return GestureDetector(
+      child: Text(legendEntry.label, style: style),
+      onTapUp: makeTapUpCallback(context, legendEntry, legend),
+    );
   }
 
   Widget createMeasureValue(BuildContext context,
       common.LegendEntry legendEntry, TappableLegend legend, bool isHidden) {
-    return new GestureDetector(
-        child: new Text(legendEntry.formattedValue!),
-        onTapUp: makeTapUpCallback(context, legendEntry, legend));
+    return GestureDetector(
+      child: Text(legendEntry.formattedValue ?? ''),
+      onTapUp: makeTapUpCallback(context, legendEntry, legend),
+    );
   }
 
   @override
@@ -84,9 +79,8 @@ class SimpleLegendEntryLayout implements LegendEntryLayout {
       TappableLegend legend, bool isHidden,
       {bool showMeasures = false}) {
     final rowChildren = <Widget>[];
+    final padding = EdgeInsets.only(right: 8.0);
 
-    // TODO: Allow setting to configure the padding.
-    final padding = new EdgeInsets.only(right: 8.0); // Material default.
     final symbol = createSymbol(context, legendEntry, legend, isHidden);
     final label = createLabel(context, legendEntry, legend, isHidden);
 
@@ -95,15 +89,14 @@ class SimpleLegendEntryLayout implements LegendEntryLayout {
         : null;
 
     rowChildren.add(symbol);
-    rowChildren.add(new Container(padding: padding));
+    rowChildren.add(Container(padding: padding));
     rowChildren.add(label);
     if (measure != null) {
-      rowChildren.add(new Container(padding: padding));
+      rowChildren.add(Container(padding: padding));
       rowChildren.add(measure);
     }
 
-    // Row automatically reverses the content if Directionality is rtl.
-    return new Row(children: rowChildren);
+    return Row(children: rowChildren);
   }
 
   GestureTapUpCallback makeTapUpCallback(BuildContext context,
@@ -115,32 +108,23 @@ class SimpleLegendEntryLayout implements LegendEntryLayout {
 
   bool operator ==(Object other) => other is SimpleLegendEntryLayout;
 
-  int get hashCode {
-    return this.runtimeType.hashCode;
-  }
+  int get hashCode => runtimeType.hashCode;
 
-  /// Convert the charts common TextStlyeSpec into a standard TextStyle, while
-  /// reducing the color opacity to 26% if the entry is hidden.
-  ///
-  /// For non-specified values, override the hidden text color to use the body 1
-  /// theme, but allow other properties of [Text] to be inherited.
   TextStyle _convertTextStyle(
       bool isHidden, BuildContext context, common.TextStyleSpec? textStyle) {
     Color? color = textStyle?.color != null
-        ? ColorUtil.toDartColor(textStyle!.color!)
+        ? Color(textStyle!.color!.hex)
         : null;
     if (isHidden) {
-      // Use a default color for hidden legend entries if none is provided.
-      color ??= Theme.of(context).textTheme.bodyText2!.color;
-      color = color!.withOpacity(0.26);
+      color ??= Theme.of(context).textTheme.bodyMedium?.color;
+      color = color?.withOpacity(0.26);
     }
 
-    return new TextStyle(
-        inherit: true,
-        fontFamily: textStyle?.fontFamily,
-        fontSize: textStyle?.fontSize != null
-            ? textStyle!.fontSize!.toDouble()
-            : null,
-        color: color);
+    return TextStyle(
+      inherit: true,
+      fontFamily: textStyle?.fontFamily,
+      fontSize: textStyle?.fontSize?.toDouble(),
+      color: color,
+    );
   }
 }
