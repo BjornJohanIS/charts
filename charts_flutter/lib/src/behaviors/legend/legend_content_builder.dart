@@ -15,7 +15,7 @@
 
 import 'package:charts_common/common.dart' as common
     show Legend, LegendState, SeriesLegend;
-import 'package:flutter/widgets.dart' show BuildContext, hashValues, Widget;
+import 'package:flutter/widgets.dart' show BuildContext, Widget;
 import 'legend.dart';
 import 'legend_entry_layout.dart';
 import 'legend_layout.dart';
@@ -26,7 +26,7 @@ abstract class LegendContentBuilder {
 
   Widget build(BuildContext context, common.LegendState legendState,
       common.Legend legend,
-      {bool showMeasures});
+      {bool showMeasures = false});
 }
 
 /// Base strategy for building a legend content widget.
@@ -35,12 +35,10 @@ abstract class LegendContentBuilder {
 /// for each legend entry. These widgets are then passed to a
 /// [LegendEntryLayout] strategy to create the legend widget.
 abstract class BaseLegendContentBuilder implements LegendContentBuilder {
-  /// Strategy for creating one widget or each legend entry.
+  /// Strategy for creating one widget per legend entry.
   LegendEntryLayout get legendEntryLayout;
 
   /// Strategy for creating the legend content widget from a list of widgets.
-  ///
-  /// This is typically the list of widgets from legend entries.
   LegendLayout get legendLayout;
 
   @override
@@ -54,15 +52,18 @@ abstract class BaseLegendContentBuilder implements LegendContentBuilder {
       }
 
       return legendEntryLayout.build(
-          context, entry, legend as TappableLegend, isHidden,
-          showMeasures: showMeasures);
+        context,
+        entry,
+        legend as TappableLegend,
+        isHidden,
+        showMeasures: showMeasures,
+      );
     }).toList();
 
     return legendLayout.build(context, entryWidgets);
   }
 }
 
-// TODO: Expose settings for tabular layout.
 /// Strategy that builds a tabular legend.
 ///
 /// [legendEntryLayout] custom strategy for creating widgets for each legend
@@ -73,12 +74,11 @@ class TabularLegendContentBuilder extends BaseLegendContentBuilder {
   final LegendEntryLayout legendEntryLayout;
   final LegendLayout legendLayout;
 
-  TabularLegendContentBuilder(
-      {LegendEntryLayout? legendEntryLayout, LegendLayout? legendLayout})
-      : this.legendEntryLayout =
-            legendEntryLayout ?? const SimpleLegendEntryLayout(),
-        this.legendLayout =
-            legendLayout ?? new TabularLegendLayout.horizontalFirst();
+  TabularLegendContentBuilder({
+    LegendEntryLayout? legendEntryLayout,
+    LegendLayout? legendLayout,
+  })  : legendEntryLayout = legendEntryLayout ?? const SimpleLegendEntryLayout(),
+        legendLayout = legendLayout ?? TabularLegendLayout.horizontalFirst();
 
   @override
   bool operator ==(Object o) {
@@ -88,5 +88,5 @@ class TabularLegendContentBuilder extends BaseLegendContentBuilder {
   }
 
   @override
-  int get hashCode => hashValues(legendEntryLayout, legendLayout);
+  int get hashCode => Object.hash(legendEntryLayout, legendLayout);
 }
