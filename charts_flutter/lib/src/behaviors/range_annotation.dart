@@ -10,8 +10,6 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:charts_common/common.dart' as common
@@ -36,6 +34,7 @@ import 'chart_behavior.dart' show ChartBehavior, GestureType;
 /// Typically used in line charts to highlight sections of the data range.
 @immutable
 class RangeAnnotation<D> extends ChartBehavior<D> {
+  @override
   final Set<GestureType> desiredGestures = {};
 
   /// List of annotations to render on the chart.
