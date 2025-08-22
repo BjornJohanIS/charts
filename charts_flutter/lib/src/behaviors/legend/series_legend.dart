@@ -2,7 +2,7 @@
 // for details.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// You may not use this file except in compliance with the License.
+// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
@@ -27,7 +27,7 @@ import 'package:charts_common/common.dart' as common
         SelectionModelType,
         TextStyleSpec;
 import 'package:collection/collection.dart' show ListEquality;
-import 'package:flutter/widgets.dart' show BuildContext, EdgeInsets, Widget, hashValues;
+import 'package:flutter/widgets.dart' show BuildContext, EdgeInsets, Widget;
 import 'package:meta/meta.dart' show immutable;
 
 import '../../chart_container.dart' show ChartContainerRenderObject;
@@ -178,13 +178,13 @@ class SeriesLegend<D> extends ChartBehavior<D> {
       entryTextStyle == o.entryTextStyle;
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         selectionModelType,
         contentBuilder,
         position,
         outsideJustification,
         insideJustification,
-        defaultHiddenSeries,
+        defaultHiddenSeries == null ? null : Object.hashAll(defaultHiddenSeries!),
         showMeasures,
         legendDefaultMeasure,
         measureFormatter,
