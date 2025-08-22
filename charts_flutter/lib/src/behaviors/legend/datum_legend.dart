@@ -133,8 +133,8 @@ class DatumLegend<D> extends ChartBehavior<D> {
   common.DatumLegend<D> createCommonBehavior() => _FlutterDatumLegend<D>(this);
 
   @override
-  void updateCommonBehavior(common.ChartBehavior commonBehavior) {
-    (commonBehavior as _FlutterDatumLegend).config = this;
+  void updateCommonBehavior(common.DatumLegend<D> commonBehavior) {
+    (commonBehavior as _FlutterDatumLegend<D>).config = this;
   }
 
   @override
