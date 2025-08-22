@@ -16,21 +16,31 @@
 import 'dart:ui' show hashValues;
 import 'package:charts_common/common.dart' as common show Color, TextStyle;
 
+/// Flutter wrapper for charts_common TextStyle
 class TextStyle implements common.TextStyle {
-  int? fontSize;
-  String? fontFamily;
-  common.Color? color;
-  double? lineHeight;
-  String? fontWeight;
+  final int? fontSize;
+  final String? fontFamily;
+  final common.Color? color;
+  final double? lineHeight;
+  final String? fontWeight;
+
+  const TextStyle({
+    this.fontSize,
+    this.fontFamily,
+    this.color,
+    this.lineHeight,
+    this.fontWeight,
+  });
 
   @override
   bool operator ==(Object other) =>
+      identical(this, other) ||
       other is TextStyle &&
-      fontSize == other.fontSize &&
-      fontFamily == other.fontFamily &&
-      fontWeight == other.fontWeight &&
-      color == other.color &&
-      lineHeight == other.lineHeight;
+          fontSize == other.fontSize &&
+          fontFamily == other.fontFamily &&
+          fontWeight == other.fontWeight &&
+          color == other.color &&
+          lineHeight == other.lineHeight;
 
   @override
   int get hashCode =>
